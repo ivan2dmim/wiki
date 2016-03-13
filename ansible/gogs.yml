@@ -1,1 +1,32 @@
+---
+- hosts: test-repo
+  tasks:
+   - name: Dependencies for Gogs and ansible tasks
+     apt: name={{item}} state=installed update_cache=true
+     with_items:
+       - apt-transport-https
+       - python-pycurl
+       - python-mysqldb
 
+   - name: Add packager.io Key
+     apt_key: url=https://deb.packager.io/key state=present
+
+   # Add specified repository into sources list using specified filename.
+   - name: Add Repository
+     apt_repository: repo='deb https://deb.packager.io/gh/pkgr/gogs jessie pkgr' state=present
+     #apt_repository: repo='deb https://deb.packager.io/gh/pkgr/gogs jessie pkgr' state=present filename='gogs'
+
+   - name: Install Gogs
+     apt: name={{item}} state=installed update_cache=true
+     with_items:
+       - gogs
+       - mysql-server-5.5
+
+# SEE: http://techwatch.keeward.com/geeks-and-nerds/properly-install-mysql-on-production-server-using-ansible/
+#   # Create database user with name 'bob' and previously hashed mysql native password '*EE0D72C1085C46C5278932678FBE2C6A782821B4' with all database privileges
+#   - name: Create MySQL root account
+#     mysql_user: name=root password='*FDD5EDE53B717CAE4FE49D31F07367812BE51DEE' encrypted=yes priv=*.*:ALL state=present
+
+#   # Create a new database with name 'bobdata'
+#   - name: Gogs MySQL DB
+#     mysql_db: name=gogs state=present
